@@ -5,6 +5,7 @@ import Login from './pages/login';
 import Register from './pages/register/Register';
 import ClinicTable from './pages/clinics/ClinicTable';
 import CreateUser from './components/CreateUser';
+import PayTable from './pages/PayTable';
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('tokenUser'));
@@ -30,6 +31,7 @@ const App = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/clinics" element={<ClinicTable />} />
           <Route path="/create_admin" element={<CreateUser />} />
+          <Route path="/clinic_table" element={<PayTable />} />
           <Route path="*" element={<Navigate to="/clinics" />} />
         </Route>
       ) : (

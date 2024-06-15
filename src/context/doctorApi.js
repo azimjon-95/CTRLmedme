@@ -1,24 +1,14 @@
 import { api } from "./api";
+
 export const clinicApi = api.injectEndpoints({
   endpoints: (builder) => ({
-
     getAllClinics: builder.query({
       query: () => 'clinics/getData',
+
+      providesTags: ["GetClinics"],
     }),
     getAllPayments: builder.query({
       query: () => 'clinics/getDataPayments',
-    }),
-    blockClinic: builder.mutation({
-      query: (id) => ({
-        url: `clinics/block/${id}`,
-        method: 'PUT',
-      }),
-    }),
-    unblockClinic: builder.mutation({
-      query: (id) => ({
-        url: `clinics/unblock/${id}`,
-        method: 'PUT',
-      }),
     }),
     deleteClinic: builder.mutation({
       query: (id) => ({
@@ -28,11 +18,11 @@ export const clinicApi = api.injectEndpoints({
     }),
     markPaymentMade: builder.mutation({
       query: (id) => ({
-        url: `clinics/payment/${id}`,
-        method: 'PUT',
+        url: `clinics/${id}/payment`,
+        method: 'POST',
       }),
+      invalidatesTags: ["GetClinics"],
     }),
-
     createClinics: builder.mutation({
       query: (body) => ({
         url: "clinics/post/data",
@@ -43,26 +33,22 @@ export const clinicApi = api.injectEndpoints({
     }),
     updateClinic: builder.mutation({
       query: ({ id, clinicData }) => ({
-        url: `clinics/${id}`,
+        url: `clinics/clinicsPut/${id}`,
         method: 'PUT',
         body: clinicData,
       }),
+      invalidatesTags: ["GetClinics"],
     }),
   }),
-
-})
+});
 
 export const {
   useGetAllClinicsQuery,
-  useBlockClinicMutation,
   useDeleteClinicMutation,
   useMarkPaymentMadeMutation,
   useCreateClinicsMutation,
   useGetAllPaymentsQuery,
-  useUnblockClinicMutation,
-  useUpdateClinicMutation, // Add this line
+  useUpdateClinicMutation,
 } = clinicApi;
-
-
 
 

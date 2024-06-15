@@ -1,250 +1,314 @@
-import React from 'react';
-import { Table, Button, message, Tooltip } from 'antd';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { Table, Button, message, Tooltip, Modal } from 'antd'; // Modal import qilingan
 import {
     useGetAllClinicsQuery,
-    useBlockClinicMutation,
-    useUnblockClinicMutation,
+    useUpdateClinicMutation,
     useDeleteClinicMutation,
-    useMarkPaymentMadeMutation
+    useMarkPaymentMadeMutation,
 } from '../../context/doctorApi';
 import { EyeTwoTone } from '@ant-design/icons';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import moment from 'moment';
+import 'moment/locale/uz';
+
+// Uzbek tilida manth oy nomlari
+moment.locale('uz', {
+    months: [
+        "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
+        "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"
+    ]
+});
 
 const ClinicTable = () => {
     const { data: clinics = [], isLoading } = useGetAllClinicsQuery();
-    const [blockClinic] = useBlockClinicMutation();
-    const [unblockClinic] = useUnblockClinicMutation();
+    const [updateClinic] = useUpdateClinicMutation();
     const [deleteClinic] = useDeleteClinicMutation();
     const [markPaymentMade] = useMarkPaymentMadeMutation();
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [clinicToDelete, setClinicToDelete] = useState(null);
+    const [paymentModalVisible, setPaymentModalVisible] = useState(false);
+    const [clinicToMarkPayment, setClinicToMarkPayment] = useState(null);
+    const [blockLoading, setBlockLoading] = useState({});
+    const [deleteLoading, setDeleteLoading] = useState({});
+    const [paymentLoading, setPaymentLoading] = useState({});
+    const [buttonDisabled, setButtonDisabled] = useState({});
+    const [paymentDates, setPaymentDates] = useState({});
 
-
-    const handleBlock = async (id, isBlocked) => {
+    const handleBlock = useCallback(async (id, blocked) => {
+        setBlockLoading(prev => ({ ...prev, [id]: true }));
         try {
-            if (isBlocked) {
-                let err = await unblockClinic(id);
-                console.log(err);
-                message.success('Klinika blokdan chiqarildi');
-            } else {
-                let err = await blockClinic(id);
-                console.log(err);
-
-                message.success('Klinika bloklandi');
-            }
+            await updateClinic({ id, clinicData: { blocked: !blocked } });
+            message.success(`Klinika ${blocked ? 'blokdan chiqarildi' : 'bloklandi'}`);
         } catch (error) {
-            message.error('Amalda xatolik yuz berdi');
+            const errorMessage = error?.data?.message || 'Amalda xatolik yuz berdi';
+            message.error(errorMessage);
         }
-    };
+        finally {
+            setBlockLoading(prev => ({ ...prev, [id]: false }));
+        }
+    }, [updateClinic]);
 
-    const handleDelete = async (id) => {
-        console.log(id);
+    const handleDelete = useCallback(async (id) => {
+        setDeleteLoading(prev => ({ ...prev, [id]: true }));
         try {
             await deleteClinic(id);
             message.success('Klinika o\'chirildi');
+            setDeleteModalVisible(false);
         } catch (error) {
-            message.error('O\'chirishda xatolik yuz berdi');
+            const errorMessage = error?.data?.message || 'O\'chirishda xatolik yuz berdi';
+            message.error(errorMessage);
         }
-    };
+        finally {
+            setDeleteLoading(prev => ({ ...prev, [id]: false }));
+        }
+    }, [deleteClinic]);
 
-    const handlePaymentMade = async (id) => {
+    const handlePaymentMade = useCallback(async (id) => {
+        setPaymentLoading(prev => ({ ...prev, [id]: true }));
         try {
-            let err = await markPaymentMade(id);
-            console.log(err);
+            let res = await markPaymentMade(id);
+            console.log(res);
             message.success('Tulov amalga oshirildi');
+            setButtonDisabled(prev => ({ ...prev, [id]: true }));
+            const currentDate = moment().format('DD-MMMM');
+            localStorage.setItem(`paymentMade-${id}-${moment().month()}`, 'true');
+            localStorage.setItem(`paymentDate-${id}-${moment().month()}`, currentDate);
+            setPaymentDates(prev => ({ ...prev, [id]: currentDate }));
         } catch (error) {
-            message.error('Tulovda xatolik yuz berdi');
+            const errorMessage = error?.data?.message || 'Tulovda xatolik yuz berdi';
+            message.error(errorMessage);
         }
-    };
+        finally {
+            setPaymentLoading(prev => ({ ...prev, [id]: false }));
+            setPaymentModalVisible(false);
+            setClinicToMarkPayment(null);
+        }
+    }, [markPaymentMade]);
 
-    const formatPhoneNumber = (phoneNumber) => {
-        const parsedNumber = parsePhoneNumberFromString(phoneNumber, 'UZ');
-        return parsedNumber ? parsedNumber.formatInternational() : phoneNumber;
-    };
+    useEffect(() => {
+        const newButtonDisabled = {};
+        const newPaymentDates = {};
+        clinics?.data?.forEach(clinic => {
+            const month = moment().month();
+            const key = `paymentMade-${clinic._id}-${month}`;
+            const dateKey = `paymentDate-${clinic._id}-${month}`;
+            newButtonDisabled[clinic._id] = localStorage.getItem(key) === 'true';
+            newPaymentDates[clinic._id] = localStorage.getItem(dateKey) || '';
+        });
+        setButtonDisabled(newButtonDisabled);
+        setPaymentDates(newPaymentDates);
+    }, [clinics]);
 
-    const columns = [
-        { title: 'Ismi', dataIndex: 'name', key: 'name', ellipsis: true },
-        {
-            title: 'Manzil', dataIndex: 'address', key: 'address', ellipsis: true,
-            render: address => (
-                <Tooltip title={address}>
-                    <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {address}
+    const formatPhoneNumber = useMemo(() => {
+        return (phoneNumber) => {
+            if (!phoneNumber || typeof phoneNumber !== 'string') {
+                return phoneNumber; // Return original value or handle as needed
+            }
+            const parsedNumber = parsePhoneNumberFromString(phoneNumber, 'UZ');
+            return parsedNumber ? parsedNumber.formatInternational() : phoneNumber;
+        };
+    }, []);
+
+    const showDeleteModal = useCallback((id) => {
+        setClinicToDelete(id);
+        setDeleteModalVisible(true);
+    }, []);
+
+    const showPaymentModal = useCallback((id) => {
+        setClinicToMarkPayment(id);
+        setPaymentModalVisible(true);
+    }, []);
+
+    const handleCancelDelete = useCallback(() => {
+        setDeleteModalVisible(false);
+        setClinicToDelete(null);
+    }, []);
+
+    const handleCancelPayment = useCallback(() => {
+        setPaymentModalVisible(false);
+        setClinicToMarkPayment(null);
+    }, []);
+
+    const expandedRowRender = useCallback((record) => {
+        const columns = [
+            {
+                title: 'Manzil',
+                dataIndex: 'address',
+                key: 'address',
+                ellipsis: true,
+                render: (address) => (
+                    <Tooltip title={address}>
+                        <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {address}
+                        </div>
+                    </Tooltip>
+                ),
+            },
+            {
+                title: 'Menejer',
+                ellipsis: true,
+                dataIndex: 'manager',
+                key: 'manager'
+            },
+            {
+                title: 'Ish Vaqti',
+                ellipsis: true,
+                dataIndex: 'workTime',
+                key: 'workTime',
+                render: (_, record) => `${record.workStartTime} - ${record.workEndTime}`,
+            },
+            {
+                title: 'Login/Parol',
+                dataIndex: 'login',
+                key: 'login',
+                render: (text, record) => (
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span>{text}</span>
+                        <Tooltip title={record.password} placement="top">
+                            <EyeTwoTone style={{ marginLeft: 8 }} />
+                        </Tooltip>
                     </div>
-                </Tooltip>
-            ),
-        },
+                ),
+            },
+            {
+                title: 'O\'chirish',
+                key: 'delete',
+                render: (_, record) => (
+                    <Button
+                        type="primary"
+                        danger
+                        loading={deleteLoading[record._id]}
+                        onClick={() => showDeleteModal(record._id)}
+                    >
+                        O'chirish
+                    </Button>
+                ),
+            },
+        ];
+
+        return (
+            <Table
+                columns={columns}
+                dataSource={[record]} // Pass the record as dataSource to display details for one clinic
+                pagination={false}
+                rowKey="_id"
+            />
+        );
+    }, [deleteLoading, showDeleteModal]);
+
+    const columns = useMemo(() => [
+        { title: 'Ismi', dataIndex: 'name', key: 'name', ellipsis: true },
         {
             title: 'Aloqa',
             dataIndex: 'contacts',
             key: 'contacts',
-            render: (contacts) => contacts.map(contact => (
-                <div style={{ whiteSpace: 'nowrap' }} key={contact}>{formatPhoneNumber(contact)}</div>
-            ))
+            render: (contacts) =>
+                contacts.map((contact) => (
+                    <div style={{ whiteSpace: 'nowrap' }} key={contact}>
+                        {formatPhoneNumber(contact)}
+                    </div>
+                )),
         },
-        { title: 'Menejer', ellipsis: true, dataIndex: 'manager', key: 'manager' },
-        { title: 'Ish Vaqti', ellipsis: true, dataIndex: 'workTime', key: 'workTime', render: (_, record) => `${record.workStartTime} - ${record.workEndTime}` },
         {
-            title: 'Login/Parol',
-            dataIndex: 'login',
-            key: 'login',
-            render: (text, record) => (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <span>{text}</span>
-                    <Tooltip title={record.password} placement="top">
-                        <EyeTwoTone style={{ marginLeft: 8 }} />
-                    </Tooltip>
-                </div>
+            title: 'Tulov sanasi',
+            dataIndex: 'paymentDate',
+            key: 'paymentDate',
+            ellipsis: true,
+            render: (paymentDate) => {
+                const formattedDate = moment(paymentDate, 'DD.MM.YYYY', true).isValid()
+                    ? moment(paymentDate, 'DD.MM.YYYY').format('DD-MMMM')
+                    : moment(paymentDate).format('DD-MMMM');
+
+                return <span>{formattedDate}</span>;
+            }
+        },
+        {
+            title: 'Oylik tulovi',
+            dataIndex: 'clinicPrice',
+            key: 'clinicPrice',
+            ellipsis: true,
+            render: (clinicPrice) => (
+                <span>
+                    {clinicPrice.toLocaleString('uz-UZ')}  so'm
+                </span>
             )
         },
         {
             title: 'Bloklash/Blokdan chiqarish',
             key: 'block',
             render: (_, record) => (
-                <Button type="primary" danger={record.blocked} onClick={() => handleBlock(record._id, record.blocked)}>
+                <Button
+                    type="primary"
+                    danger={record.blocked}
+                    loading={blockLoading[record._id]}
+                    onClick={() => handleBlock(record._id, record.blocked)}
+                >
                     {record.blocked ? 'Blokdan chiqarish' : 'Bloklash'}
                 </Button>
-            )
-        },
-        {
-            title: 'O\'chirish',
-            key: 'delete',
-            render: (_, record) => (
-                <Button type="primary" danger onClick={() => handleDelete(record._id)}>
-                    O'chirish
-                </Button>
-            )
+            ),
         },
         {
             title: 'Tulov Qilindi',
             key: 'payment',
-            render: (_, record) => (
-                <Button type="primary" onClick={() => handlePaymentMade(record._id)}>
-                    Tulov Qilindi
-                </Button>
-            )
-        }
-    ];
+            render: (_, record) => {
+                const paymentDate = paymentDates[record._id];
+                const buttonContent = (
+                    <Button
+                        type="primary"
+                        disabled={buttonDisabled[record._id]}
+                        loading={paymentLoading[record._id]}
+                        onClick={() => showPaymentModal(record._id)}
+                    >
+                        Tulov Qilindi
+                    </Button>
+                );
+
+                return buttonDisabled[record._id] ? (
+                    <Tooltip title={`Tulov sanasi: ${paymentDate}`}>
+                        {buttonContent}
+                    </Tooltip>
+                ) : (
+                    buttonContent
+                );
+            },
+        },
+    ], [blockLoading, paymentLoading, buttonDisabled, paymentDates, formatPhoneNumber, handleBlock, showPaymentModal]);
 
     return (
         <div>
-            <style jsx>{`
-                .ant-table {
-                    font-size: 12px; /* Barcha matnlar uchun font o'lchami */
-                }
-                .eye-icon-hover {
-                    display: none;
-                }
-                .eye-icon:hover + .eye-icon-hover {
-                    display: inline-block;
-                }
-                .eye-icon:hover {
-                    display: none;
-                }
-                .ant-table-thead > tr > th {
-                    font-size: 12px; /* Jadval sarlavhalari uchun font o'lchami */
-                }
-                .ant-table-tbody > tr > td {
-                    font-size: 12px; /* Jadval qatorlari uchun font o'lchami */
-                }
-                .ant-btn {
-                    font-size: 12px; /* Tugmalar uchun font o'lchami */
-                }
-            `}</style>
-            <Table loading={isLoading} pagination={false} size="small" dataSource={clinics?.data} columns={columns} rowKey="_id" />
+            <Table
+                columns={columns}
+                loading={isLoading}
+                pagination={false}
+                size="small"
+                rowKey="_id"
+                expandable={{
+                    expandedRowRender,
+                }}
+                dataSource={clinics?.data}
+            />
+            <Modal
+                title="Klinikani o'chirish"
+                visible={deleteModalVisible}
+                onOk={() => handleDelete(clinicToDelete)}
+                onCancel={handleCancelDelete}
+                okText="OK"
+                cancelText="Cancel"
+            >
+                <p>Klinikani o'chirishni tasdiqlaysizmi?</p>
+            </Modal>
+            <Modal
+                title="Tulovni tasdiqlash"
+                visible={paymentModalVisible}
+                onOk={() => handlePaymentMade(clinicToMarkPayment)}
+                onCancel={handleCancelPayment}
+                okText="OK"
+                cancelText="Cancel"
+            >
+                <p>Tulovni tasdiqlaysizmi?</p>
+            </Modal>
         </div>
     );
 };
 
 export default ClinicTable;
-
-
-
-
-
-
-// import React from 'react';
-// import { Table, Spin, Alert, Button } from 'antd';
-// import { useGetAllClinicsQuery } from '../../context/doctorApi';
-// import MainLayout from '../../home/Home';
-
-// const ClinicTable = () => {
-//     const { data: clinics, error, isLoading } = useGetAllClinicsQuery();
-//     // if (isLoading) return <Spin />;
-//     // if (error) return <Alert message="Error" type="error" />;
-
-//     const columns = [
-//         { title: 'Ismi', dataIndex: 'name', key: 'name' },
-//         { title: 'Manzil', dataIndex: 'address', key: 'address' },
-//         { title: 'Aloqa', dataIndex: 'contact', key: 'contact' },
-//         { title: 'Menejer', dataIndex: 'manager', key: 'manager' },
-//         { title: 'Xizmatlar', dataIndex: 'services', key: 'services' },
-//         { title: 'Litsenziyalar', dataIndex: 'licenses', key: 'licenses' },
-//         { title: 'Xodimlar', dataIndex: 'staff', key: 'staff' },
-//         { title: 'Uskunalar', dataIndex: 'equipment', key: 'equipment' },
-//         { title: 'Soliq Hisoboti', dataIndex: 'taxReport', key: 'taxReport' },
-//         { title: 'Davlat Hujjatlari', dataIndex: 'stateDocuments', key: 'stateDocuments' },
-//         { title: 'Ish Vaqti', dataIndex: 'workTime', key: 'workTime' },
-//         { title: 'Login', dataIndex: 'login', key: 'login' },
-//         {
-//             title: 'Bloklash',
-//             dataIndex: 'userType',
-//             key: 'userType',
-//             render: (_, record) => (
-//                 <Button type="primary" danger onClick={() => handleBlock(record.key)}>
-//                     Bloklash
-//                 </Button>
-//             )
-//         },
-//         {
-//             title: 'O\'chirish',
-//             dataIndex: 'clear',
-//             key: 'clear',
-//             render: (_, record) => (
-//                 <Button type="primary" onClick={() => handleClear(record.key)}>
-//                     O'chirish
-//                 </Button>
-//             )
-//         }
-//     ];
-//     // Dummy data for the table
-//     const data = [
-//         {
-//             key: '1',
-//             name: 'Klinika 1',
-//             address: 'Manzil 1',
-//             contact: 'Aloqa 1',
-//             manager: 'Menejer 1',
-//             services: 'Xizmatlar 1',
-//             licenses: 'Litsenziyalar 1',
-//             staff: 'Xodimlar 1',
-//             equipment: 'Uskunalar 1',
-//             taxReport: 'Soliq Hisoboti 1',
-//             stateDocuments: 'Davlat Hujjatlari 1',
-//             workTime: 'Ish Vaqti 1',
-//             login: 'Login 1',
-//             userType: 'Admin',
-//             clear: 'Clear'
-//         }
-//         // Yana boshqa ma'lumotlar qo'shishingiz mumkin
-//     ];
-//     // Bloklash uchun funksiya
-//     const handleBlock = (key) => {
-//         console.log('Bloklash bosildi, ID:', key);
-//         // Bloklash logikasini bu yerga qo'shing
-//     };
-
-//     // O'chirish uchun funksiya
-//     const handleClear = (key) => {
-//         console.log('O\'chirish bosildi, ID:', key);
-//         // O'chirish logikasini bu yerga qo'shing
-//     };
-
-//     return (
-//         <div >
-//             <MainLayout>
-//                 <Table size="small" dataSource={data} columns={columns} rowKey="_id" />
-//             </MainLayout>
-//         </div>
-//     )
-// };
-
-// export default ClinicTable;

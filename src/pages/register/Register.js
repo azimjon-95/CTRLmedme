@@ -4,6 +4,8 @@ import { useForm, Controller } from 'react-hook-form';
 import { useCreateClinicsMutation } from '../../context/doctorApi';
 import moment from 'moment';
 import { PlusOutlined } from '@ant-design/icons';
+import { PhoneInput } from 'react-international-phone';
+import './PhoneInput.css'
 
 const { Option } = Select;
 
@@ -18,19 +20,81 @@ const Register = () => {
             data.userType = "owner";
             data.workStartTime = moment(data.workStartTime).format('HH:mm');
             data.workEndTime = moment(data.workEndTime).format('HH:mm');
-            data.paymentDate = data.paymentDate ? moment(data.paymentDate, 'DD.MM.YYYY').toDate() : null;
+            data.paymentDate = moment(data.paymentDate).format('DD.MM.YYYY');
             data.contacts = contacts;
-            console.log(data); // Console log the data here
             let res = await createClinic(data)
             console.log(res);
             message.success('Ro‘yxatdan o‘tish muvaffaqiyatli yakunlandi');
+            // Redirect to '/clinics'
+            window.location.href = '/clinics';
+
         } catch (error) {
             message.error('Ro‘yxatdan o‘tishda xatolik yuz berdi: ' + error.message);
         }
     };
 
-    const handleInputChange = (e) => {
-        setCurrentContact(e.target.value);
+    // 
+    // const onSubmit = async (data) => {
+    //     try {
+    //         // Prepare data
+    //         const requestData = {
+    //             domain: domainName, // Domen nomi
+    //             // Qo'shimcha ma'lumotlar, masalan, foydalanuvchi ma'lumotlari
+    //             user: {
+    //                 name: data.manager,
+    //                 email: data.email,
+    //                 // Qo'shimcha ma'lumotlar
+    //             }
+    //         };
+
+    //         // Domen tekshirish uchun API ga so'rov yuborish
+    //         const checkDomainResponse = await axios.post('https://api.ahost.uz/check-domain', requestData, {
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': 'Bearer YOUR_API_TOKEN'
+    //             }
+    //         });
+
+    //         if (!checkDomainResponse.data.available) {
+    //             throw new Error('Domenni tekshirishda xatolik yuz berdi');
+    //         }
+
+    //         // Domen mavjud bo'lsa
+    //         if (checkDomainResponse.data.available) {
+    //             // Domen ro'yxatdan o'tkazish uchun so'rov yuborish
+    //             const registerDomainResponse = await axios.post('https://api.ahost.uz/register-domain', requestData, {
+    //                 headers: {
+    //                     'Content-Type': 'application/json',
+    //                     'Authorization': 'Bearer YOUR_API_TOKEN'
+    //                 }
+    //             });
+
+    //             console.log('Domen ro\'yxatdan o\'tkazildi:', registerDomainResponse.data);
+    //         } else {
+    //             console.log('Domen band');
+    //             // Foydalanuvchiga xabar berish
+    //         }
+
+    //         // Ilovada yozish uchun
+    //         data.userType = "owner";
+    //         data.workStartTime = moment(data.workStartTime).format('HH:mm');
+    //         data.workEndTime = moment(data.workEndTime).format('HH:mm');
+    //         data.paymentDate = moment(data.paymentDate).format('DD.MM.YYYY');
+    //         data.contacts = contacts;
+    //         data.domainName = domainName;
+    //         let res = await createClinic(data);
+    //         console.log(res);
+    //         message.success('Ro‘yxatdan o‘tish muvaffaqiyatli yakunlandi');
+    //         // Saytga o‘tish
+    //         window.location.href = '/clinics';
+
+    //     } catch (error) {
+    //         message.error('Ro‘yxatdan o‘tishda xatolik yuz berdi: ' + error.message);
+    //     }
+    // };
+
+    const handleInputChange = (value) => {
+        setCurrentContact(value); // Update state with the value directly
     };
 
     const addContact = () => {
@@ -74,43 +138,6 @@ const Register = () => {
                             />
                         </Form.Item>
                     </Col>
-                    {/* <Col span={8}>
-                        <Form.Item label="Aloqa uchun tel" validateStatus={errors.currentContact ? 'error' : ''} help={errors.currentContact ? errors.currentContact.message : ''}>
-                            <div style={{ display: "flex" }}>
-                                <Controller
-                                    name="currentContact"
-                                    control={control}
-
-                                    rules={{
-                                        required: 'Aloqa uchun tel talab qilinadi',
-                                        pattern: {
-                                            value: /^[0-9]{9,13}$/,
-                                            message: 'Aloqa raqami 9-13 raqamdan iborat bo‘lishi kerak',
-                                        },
-                                    }}
-                                    render={({ field }) => (
-                                        <Input
-                                            {...field}
-                                            value={currentContact}
-                                            onChange={(e) => {
-                                                handleInputChange(e);
-                                                field.onChange(e);
-                                            }}
-                                            placeholder="Aloqa uchun telefon raqamini kiriting"
-                                        />
-                                    )}
-                                />
-                                <Button type="dashed" onClick={addContact} icon={<PlusOutlined />} />
-                            </div>
-                        </Form.Item>
-                        <div style={{ display: "flex", flexWrap: "wrap" }}>
-                            {contacts.map((contact, index) => (
-                                <Tag key={index} closable onClose={() => removeContact(index)} style={{ marginTop: '8px' }}>
-                                    {contact}
-                                </Tag>
-                            ))}
-                        </div>
-                    </Col> */}
 
                     <Col span={8}>
                         <Form.Item
@@ -118,28 +145,14 @@ const Register = () => {
                             validateStatus={errors.currentContact ? 'error' : ''}
                             help={errors.currentContact ? errors.currentContact.message : ''}
                         >
-                            <div style={{ display: "flex" }}>
-                                <Controller
-                                    name="currentContact"
-                                    control={control}
-                                    rules={{
-                                        required: 'Aloqa uchun tel talab qilinadi',
-                                        pattern: {
-                                            value: /^[0-9]{9,13}$/,
-                                            message: 'Aloqa raqami 9-13 raqamdan iborat bo‘lishi kerak',
-                                        },
-                                    }}
-                                    render={({ field }) => (
-                                        <Input
-                                            {...field}
-                                            value={currentContact}
-                                            onChange={(e) => {
-                                                handleInputChange(e);
-                                                field.onChange(e);
-                                            }}
-                                            placeholder="Aloqa uchun telefon raqamini kiriting"
-                                        />
-                                    )}
+                            <div style={{ display: "flex", alignItems: "center" }}>
+                                <PhoneInput
+                                    defaultCountry="uz"
+                                    value={currentContact}
+                                    className='PhoneInput_el'
+                                    onChange={(value) => handleInputChange(value)}
+                                    placeholder="Aloqa uchun telefon raqamini kiriting"
+                                    inputStyle={{ width: '100%', height: "31px", border: ".5px solid #d8d8d8", borderRadius: "5px", textIndent: "10px", outline: "none" }} // Komponentni moslashtirish uchun stili o'zgartiring
                                 />
                                 <Button type="dashed" onClick={addContact} icon={<PlusOutlined />} />
                             </div>
@@ -279,3 +292,8 @@ const Register = () => {
 };
 
 export default Register;
+
+
+
+
+
