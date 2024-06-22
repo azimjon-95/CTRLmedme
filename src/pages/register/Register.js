@@ -5,32 +5,35 @@ import { useCreateClinicsMutation } from '../../context/doctorApi';
 import moment from 'moment';
 import { PlusOutlined } from '@ant-design/icons';
 import { PhoneInput } from 'react-international-phone';
+import { useNavigate } from 'react-router-dom'
 import './PhoneInput.css'
 
 const { Option } = Select;
 
 const Register = () => {
+    let navigate = useNavigate()
     const { handleSubmit, control, formState: { errors } } = useForm();
     const [createClinic, { isLoading }] = useCreateClinicsMutation();
     const [contacts, setContacts] = useState([]);
     const [currentContact, setCurrentContact] = useState('');
 
     const onSubmit = async (data) => {
-        try {
-            data.userType = "owner";
-            data.workStartTime = moment(data.workStartTime).format('HH:mm');
-            data.workEndTime = moment(data.workEndTime).format('HH:mm');
-            data.paymentDate = moment(data.paymentDate).format('DD.MM.YYYY');
-            data.contacts = contacts;
-            let res = await createClinic(data)
-            console.log(res);
-            message.success('Ro‘yxatdan o‘tish muvaffaqiyatli yakunlandi');
-            // Redirect to '/clinics'
-            window.location.href = '/clinics';
 
-        } catch (error) {
-            message.error('Ro‘yxatdan o‘tishda xatolik yuz berdi: ' + error.message);
+        data.userType = "owner";
+        data.workStartTime = moment(data.workStartTime).format('HH:mm');
+        data.workEndTime = moment(data.workEndTime).format('HH:mm');
+        data.paymentDate = moment(data.paymentDate).format('DD.MM.YYYY');
+        data.contacts = contacts;
+        let res = await createClinic(data)
+        console.log(res);
+        if (res?.data?.success) {
+            message.success('Ro‘yxatdan o‘tish muvaffaqiyatli yakunlandi');
+            // navigate('/clinics');
+        } else {
+            message.error('Ro‘yxatdan o‘tishda xatolik yuz berdi', res?.error);
         }
+
+
     };
 
     // 
