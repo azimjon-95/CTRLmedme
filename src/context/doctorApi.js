@@ -3,23 +3,24 @@ import { api } from "./api";
 export const clinicApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getAllClinics: builder.query({
-      query: () => 'clinics/getData',
+      query: () => "clinics/getData",
 
       providesTags: ["GetClinics"],
     }),
     getAllPayments: builder.query({
-      query: () => 'clinics/getDataPayments',
+      query: () => "clinics/getDataPayments",
     }),
     deleteClinic: builder.mutation({
       query: (id) => ({
         url: `clinics/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
+      invalidatesTags: ["GetClinics"],
     }),
     markPaymentMade: builder.mutation({
       query: (id) => ({
         url: `clinics/${id}/payment`,
-        method: 'POST',
+        method: "POST",
       }),
       invalidatesTags: ["GetClinics"],
     }),
@@ -34,7 +35,7 @@ export const clinicApi = api.injectEndpoints({
     updateClinic: builder.mutation({
       query: ({ id, clinicData }) => ({
         url: `clinics/clinicsPut/${id}`,
-        method: 'PUT',
+        method: "PUT",
         body: clinicData,
       }),
       invalidatesTags: ["GetClinics"],
@@ -50,5 +51,3 @@ export const {
   useGetAllPaymentsQuery,
   useUpdateClinicMutation,
 } = clinicApi;
-
-
