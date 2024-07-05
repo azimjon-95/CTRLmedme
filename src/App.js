@@ -1,26 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import MainLayout from './home/Home';
-import Login from './pages/login';
-import Register from './pages/register/Register';
-import ClinicTable from './pages/clinics/ClinicTable';
-import CreateUser from './components/CreateUser';
-import PayTable from './pages/PayTable';
+import React, { useState, useEffect } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import MainLayout from "./home/Home";
+import Login from "./pages/login";
+import Register from "./pages/register/Register";
+import ClinicTable from "./pages/clinics/ClinicTable";
+import CreateUser from "./components/CreateUser";
+import PayTable from "./pages/PayTable";
 
 const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('tokenUser'));
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    !!localStorage.getItem("tokenUser")
+  );
 
   const handleLogout = () => {
-    localStorage.removeItem('tokenUser');
+    localStorage.removeItem("tokenUser");
     setIsAuthenticated(false);
-    window.location.href = '/login';
+    window.location.href = "/login";
   };
 
   useEffect(() => {
-    setIsAuthenticated(!!localStorage.getItem('tokenUser'));
+    setIsAuthenticated(!!localStorage.getItem("tokenUser"));
   }, []);
-
-  console.log(isAuthenticated);
 
   return (
     <Routes>
@@ -42,8 +42,6 @@ const App = () => {
 };
 
 export default App;
-
-
 
 // import React, { useState, useEffect } from 'react';
 // import { Routes, Route, Navigate } from 'react-router-dom';
@@ -86,6 +84,3 @@ export default App;
 // };
 
 // export default App;
-
-
-
