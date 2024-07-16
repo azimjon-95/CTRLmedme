@@ -133,7 +133,7 @@ const Register = () => {
         <Row gutter={16}>
           <Col span={8}>
             <Form.Item
-              label="Klinika nomi"
+              label="Shifoxona nomi"
               validateStatus={errors.name ? "error" : ""}
               help={errors.name ? errors.name.message : ""}
             >
@@ -141,9 +141,9 @@ const Register = () => {
                 name="name"
                 control={control}
                 defaultValue=""
-                rules={{ required: "Klinika nomi talab qilinadi" }}
+                rules={{ required: "Shifoxona nomi talab qilinadi" }}
                 render={({ field }) => (
-                  <Input {...field} placeholder="Klinika nomini kiriting" />
+                  <Input {...field} placeholder="Shifoxona nomini kiriting" />
                 )}
               />
             </Form.Item>
@@ -313,7 +313,7 @@ const Register = () => {
           </Col>
           <Col span={8}>
             <Form.Item
-              label="Klinika narxini tanlang"
+              label="Shifoxona narxini tanlang"
               validateStatus={errors.clinicPrice ? "error" : ""}
               help={errors.clinicPrice ? errors.clinicPrice.message : ""}
             >
@@ -321,16 +321,16 @@ const Register = () => {
                 name="clinicPrice"
                 control={control}
                 defaultValue=""
-                rules={{ required: "Klinika narxini tanlang" }}
+                rules={{ required: "Shifoxona narxini tanlang" }}
                 render={({ field }) => (
-                  <Select {...field} placeholder="Klinika narxini tanlang">
-                    <Option value={1000000}>{`Klinika A - ${formatNumber(
+                  <Select {...field} placeholder="Shifoxona narxini tanlang">
+                    <Option value={1000000}>{`Shifoxona A - ${formatNumber(
                       1000000
                     )} so'm`}</Option>
-                    <Option value={700000}>{`Klinika B - ${formatNumber(
+                    <Option value={700000}>{`Shifoxona B - ${formatNumber(
                       700000
                     )} so'm`}</Option>
-                    <Option value={500000}>{`Klinika C - ${formatNumber(
+                    <Option value={500000}>{`Shifoxona C - ${formatNumber(
                       500000
                     )} so'm`}</Option>
                   </Select>

@@ -85,10 +85,10 @@ const MainLayout = ({ handleLogout }) => {
             </Link>
           </Menu.Item>
           <Menu.Item key="/clinics" icon={<AppstoreOutlined />}>
-            <Link to="/clinics">Klinikalar jadvali</Link>
+            <Link to="/clinics">Shifoxonalar jadvali</Link>
           </Menu.Item>
           <Menu.Item key="/register" icon={<BiClinic />}>
-            <Link to="/register">Klinikani Ro'yxatga olish</Link>
+            <Link to="/register">Shifoxonani Ro'yxatga olish</Link>
           </Menu.Item>
           <Menu.Item key="/create_admin" icon={<UserOutlined />}>
             <Link to="/create_admin">Admindi Ro'yxatga olish</Link>
@@ -177,10 +177,10 @@ export default MainLayout;
 //                         </div>
 //                     </div>
 //                     <Menu.Item key="/clinics" icon={<AppstoreOutlined />}>
-//                         <Link to="/clinics">Klinikalar jadvali</Link>
+//                         <Link to="/clinics">Shifoxonalar jadvali</Link>
 //                     </Menu.Item>
 //                     <Menu.Item key="/register" icon={<BiClinic />}>
-//                         <Link to="/register">Klinikani Ro'yxatga olish</Link>
+//                         <Link to="/register">Shifoxonani Ro'yxatga olish</Link>
 //                     </Menu.Item>
 //                     <Menu.Item key="/create_admin" icon={<UserOutlined />}>
 //                         <Link to="/create_admin">Admindi Ro'yxatga olish</Link>

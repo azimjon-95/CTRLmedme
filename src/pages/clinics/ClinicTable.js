@@ -50,7 +50,7 @@ const ClinicTable = () => {
       try {
         await updateClinic({ id, clinicData: { blocked: !blocked } });
         message.success(
-          `Klinika ${blocked ? "blokdan chiqarildi" : "bloklandi"}`
+          `Shifoxona ${blocked ? "blokdan chiqarildi" : "bloklandi"}`
         );
       } catch (error) {
         const errorMessage = error?.data?.message || "Amalda xatolik yuz berdi";
@@ -67,7 +67,7 @@ const ClinicTable = () => {
       setDeleteLoading((prev) => ({ ...prev, [id]: true }));
       try {
         await deleteClinic(id);
-        message.success("Klinika o'chirildi");
+        message.success("Shifoxona o'chirildi");
         setDeleteModalVisible(false);
       } catch (error) {
         const errorMessage =
@@ -334,14 +334,14 @@ const ClinicTable = () => {
         dataSource={clinics?.data}
       />
       <Modal
-        title="Klinikani o'chirish"
+        title="Shifoxonani o'chirish"
         visible={deleteModalVisible}
         onOk={() => handleDelete(clinicToDelete)}
         onCancel={handleCancelDelete}
         okText="OK"
         cancelText="Cancel"
       >
-        <p>Klinikani o'chirishni tasdiqlaysizmi?</p>
+        <p>Shifoxonani o'chirishni tasdiqlaysizmi?</p>
       </Modal>
       <Modal
         title="Tulovni tasdiqlash"
