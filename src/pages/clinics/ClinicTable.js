@@ -108,18 +108,44 @@ const ClinicTable = () => {
     [markPaymentMade]
   );
 
+  // useEffect(() => {
+  //   const newButtonDisabled = {};
+  //   const newPaymentDates = {};
+  //   clinics?.data?.forEach((clinic) => {
+  //     const month = moment().month();
+  //     const key = `paymentMade-${clinic._id}-${month}`;
+  //     const dateKey = `paymentDate-${clinic._id}-${month}`;
+  //     newButtonDisabled[clinic._id] = localStorage.getItem(key) === "true";
+  //     newPaymentDates[clinic._id] = localStorage.getItem(dateKey) || "";
+  //   });
+  //   setButtonDisabled(newButtonDisabled);
+  //   setPaymentDates(newPaymentDates);
+  // }, [clinics]);
+
   useEffect(() => {
+    if (!clinics?.data) return; // Add this line to prevent unnecessary updates
+
     const newButtonDisabled = {};
     const newPaymentDates = {};
-    clinics?.data?.forEach((clinic) => {
+    clinics.data.forEach((clinic) => {
       const month = moment().month();
       const key = `paymentMade-${clinic._id}-${month}`;
       const dateKey = `paymentDate-${clinic._id}-${month}`;
       newButtonDisabled[clinic._id] = localStorage.getItem(key) === "true";
       newPaymentDates[clinic._id] = localStorage.getItem(dateKey) || "";
     });
-    setButtonDisabled(newButtonDisabled);
-    setPaymentDates(newPaymentDates);
+
+    setButtonDisabled((prev) =>
+      JSON.stringify(prev) !== JSON.stringify(newButtonDisabled)
+        ? newButtonDisabled
+        : prev
+    );
+
+    setPaymentDates((prev) =>
+      JSON.stringify(prev) !== JSON.stringify(newPaymentDates)
+        ? newPaymentDates
+        : prev
+    );
   }, [clinics]);
 
   const formatPhoneNumber = useMemo(() => {
@@ -335,7 +361,7 @@ const ClinicTable = () => {
       />
       <Modal
         title="Shifoxonani o'chirish"
-        visible={deleteModalVisible}
+        open={deleteModalVisible}
         onOk={() => handleDelete(clinicToDelete)}
         onCancel={handleCancelDelete}
         okText="OK"
@@ -345,7 +371,7 @@ const ClinicTable = () => {
       </Modal>
       <Modal
         title="Tulovni tasdiqlash"
-        visible={paymentModalVisible}
+        open={paymentModalVisible}
         onOk={() => handlePaymentMade(clinicToMarkPayment)}
         onCancel={handleCancelPayment}
         okText="OK"

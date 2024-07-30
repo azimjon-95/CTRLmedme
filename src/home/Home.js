@@ -114,7 +114,7 @@ const MainLayout = ({ handleLogout }) => {
       </Layout>
       <Modal
         title="Chiqish"
-        visible={isModalVisible}
+        open={isModalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
         okText="OK"
