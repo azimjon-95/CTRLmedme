@@ -11,16 +11,14 @@ const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('tokenUser'));
   const navigate = useNavigate()
   const handleLogout = () => {
-    localStorage.removeItem('tokenUser');
+    localStorage.removeItem("tokenUser");
     setIsAuthenticated(false);
     navigate('/login');
   };
 
   useEffect(() => {
-    setIsAuthenticated(!!localStorage.getItem('tokenUser'));
+    setIsAuthenticated(!!localStorage.getItem("tokenUser"));
   }, []);
-
-  console.log(isAuthenticated);
 
   return (
     <Routes>
@@ -42,8 +40,6 @@ const App = () => {
 };
 
 export default App;
-
-
 
 // import React, { useState, useEffect } from 'react';
 // import { Routes, Route, Navigate } from 'react-router-dom';
@@ -86,6 +82,3 @@ export default App;
 // };
 
 // export default App;
-
-
-
