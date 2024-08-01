@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import MainLayout from './home/Home';
 import Login from './pages/login';
 import Register from './pages/register/Register';
@@ -9,11 +9,11 @@ import PayTable from './pages/PayTable';
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('tokenUser'));
-
+  const navigate = useNavigate()
   const handleLogout = () => {
     localStorage.removeItem('tokenUser');
     setIsAuthenticated(false);
-    window.location.href = '/login';
+    navigate('/login');
   };
 
   useEffect(() => {

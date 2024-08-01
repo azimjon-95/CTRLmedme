@@ -29,7 +29,7 @@ const MainLayout = ({ handleLogout }) => {
     };
 
     // Ensure clinicBalance is an array and has at least one element
-    const clinicBalanceObject = Array.isArray(clinicBalance) && clinicBalance.length > 0 ? clinicBalance[0] : null;
+    const clinicBalanceObject = Array.isArray(clinicBalance) && clinicBalance?.length > 0 ? clinicBalance[0] : null;
 
     // Format the balance with commas
     const formattedBalance = clinicBalanceObject ?

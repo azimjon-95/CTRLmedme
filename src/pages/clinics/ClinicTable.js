@@ -229,7 +229,7 @@ const ClinicTable = () => {
             ellipsis: true,
             render: (clinicPrice) => (
                 <span>
-                    {clinicPrice.toLocaleString('uz-UZ')}  so'm
+                    {clinicPrice?.toLocaleString('uz-UZ')}  so'm
                 </span>
             )
         },
@@ -312,3 +312,8 @@ const ClinicTable = () => {
 };
 
 export default ClinicTable;
+
+
+
+
+

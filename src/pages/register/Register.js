@@ -25,10 +25,11 @@ const Register = () => {
         data.paymentDate = moment(data.paymentDate).format('DD.MM.YYYY');
         data.contacts = contacts;
         let res = await createClinic(data)
+        console.log(data);
         console.log(res);
         if (res?.data?.success) {
             message.success('Ro‘yxatdan o‘tish muvaffaqiyatli yakunlandi');
-            // navigate('/clinics');
+            navigate('/clinics');
         } else {
             message.error('Ro‘yxatdan o‘tishda xatolik yuz berdi', res?.error);
         }
@@ -36,65 +37,6 @@ const Register = () => {
 
     };
 
-    // 
-    // const onSubmit = async (data) => {
-    //     try {
-    //         // Prepare data
-    //         const requestData = {
-    //             domain: domainName, // Domen nomi
-    //             // Qo'shimcha ma'lumotlar, masalan, foydalanuvchi ma'lumotlari
-    //             user: {
-    //                 name: data.manager,
-    //                 email: data.email,
-    //                 // Qo'shimcha ma'lumotlar
-    //             }
-    //         };
-
-    //         // Domen tekshirish uchun API ga so'rov yuborish
-    //         const checkDomainResponse = await axios.post('https://api.ahost.uz/check-domain', requestData, {
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': 'Bearer YOUR_API_TOKEN'
-    //             }
-    //         });
-
-    //         if (!checkDomainResponse.data.available) {
-    //             throw new Error('Domenni tekshirishda xatolik yuz berdi');
-    //         }
-
-    //         // Domen mavjud bo'lsa
-    //         if (checkDomainResponse.data.available) {
-    //             // Domen ro'yxatdan o'tkazish uchun so'rov yuborish
-    //             const registerDomainResponse = await axios.post('https://api.ahost.uz/register-domain', requestData, {
-    //                 headers: {
-    //                     'Content-Type': 'application/json',
-    //                     'Authorization': 'Bearer YOUR_API_TOKEN'
-    //                 }
-    //             });
-
-    //             console.log('Domen ro\'yxatdan o\'tkazildi:', registerDomainResponse.data);
-    //         } else {
-    //             console.log('Domen band');
-    //             // Foydalanuvchiga xabar berish
-    //         }
-
-    //         // Ilovada yozish uchun
-    //         data.userType = "owner";
-    //         data.workStartTime = moment(data.workStartTime).format('HH:mm');
-    //         data.workEndTime = moment(data.workEndTime).format('HH:mm');
-    //         data.paymentDate = moment(data.paymentDate).format('DD.MM.YYYY');
-    //         data.contacts = contacts;
-    //         data.domainName = domainName;
-    //         let res = await createClinic(data);
-    //         console.log(res);
-    //         message.success('Ro‘yxatdan o‘tish muvaffaqiyatli yakunlandi');
-    //         // Saytga o‘tish
-    //         window.location.href = '/clinics';
-
-    //     } catch (error) {
-    //         message.error('Ro‘yxatdan o‘tishda xatolik yuz berdi: ' + error.message);
-    //     }
-    // };
 
     const handleInputChange = (value) => {
         setCurrentContact(value); // Update state with the value directly
