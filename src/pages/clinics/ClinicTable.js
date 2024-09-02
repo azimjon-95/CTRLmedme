@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from "react";
-import { Table, Button, message, Tooltip, Modal } from "antd"; // Modal import qilingan
+import { Table, Button, message, Tooltip, Modal, Switch } from "antd"; // Modal import qilingan
 import {
   useGetAllClinicsQuery,
   useUpdateClinicMutation,
@@ -259,7 +259,7 @@ const ClinicTable = () => {
     () => [
       { title: "Ismi", dataIndex: "name", key: "name", ellipsis: true },
       {
-        title: "Aloqa",
+        title: "Telefon",
         dataIndex: "contacts",
         key: "contacts",
         render: (contacts) =>
@@ -270,7 +270,7 @@ const ClinicTable = () => {
           )),
       },
       {
-        title: "Tulov sanasi",
+        title: "To'lov sanasi",
         dataIndex: "paymentDate",
         key: "paymentDate",
         ellipsis: true,
@@ -287,7 +287,7 @@ const ClinicTable = () => {
         },
       },
       {
-        title: "Oylik tulovi",
+        title: "Oylik to'lovi",
         dataIndex: "clinicPrice",
         key: "clinicPrice",
         ellipsis: true,
@@ -296,21 +296,18 @@ const ClinicTable = () => {
         ),
       },
       {
-        title: "Bloklash/Blokdan chiqarish",
+        title: "Bloklash",
         key: "block",
         render: (_, record) => (
-          <Button
-            type="primary"
-            danger={record.blocked}
+          <Switch
             loading={blockLoading[record._id]}
-            onClick={() => handleBlock(record._id, record.blocked)}
-          >
-            {record.blocked ? "Blokdan chiqarish" : "Bloklash"}
-          </Button>
+            defaultChecked={record.blocked}
+            onChange={() => handleBlock(record._id, record.blocked)}
+          />
         ),
       },
       {
-        title: "Tulov Qilindi",
+        title: "Aktiv qilish",
         key: "payment",
         render: (_, record) => {
           const paymentDate = paymentDates[record._id];
@@ -370,22 +367,17 @@ const ClinicTable = () => {
         <p>Shifoxonani o'chirishni tasdiqlaysizmi?</p>
       </Modal>
       <Modal
-        title="Tulovni tasdiqlash"
+        title="To'lovni tasdiqlash"
         open={paymentModalVisible}
         onOk={() => handlePaymentMade(clinicToMarkPayment)}
         onCancel={handleCancelPayment}
         okText="OK"
         cancelText="Cancel"
       >
-        <p>Tulovni tasdiqlaysizmi?</p>
+        <p>To'lovni tasdiqlaysizmi?</p>
       </Modal>
     </div>
   );
 };
 
 export default ClinicTable;
-
-
-
-
-

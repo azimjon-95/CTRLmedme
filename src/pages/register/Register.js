@@ -14,7 +14,6 @@ import {
 import { useForm, Controller } from "react-hook-form";
 import { useCreateClinicsMutation } from "../../context/doctorApi";
 import moment from "moment";
-import { PlusOutlined } from "@ant-design/icons";
 import { PhoneInput } from "react-international-phone";
 import { useNavigate } from "react-router-dom";
 import "./PhoneInput.css";
@@ -27,24 +26,30 @@ const Register = () => {
     handleSubmit,
     control,
     formState: { errors },
+    reset,
   } = useForm();
   const [createClinic, { isLoading }] = useCreateClinicsMutation();
   const [contacts, setContacts] = useState([]);
-  const [currentContact, setCurrentContact] = useState("");
+  const [phone, setPhone] = useState("");
 
   const onSubmit = async (data) => {
+    if (contacts.length === 0) {
+      return message.warning("Telefon raqam kiritilmadi!");
+    }
     data.userType = "owner";
     data.workStartTime = moment(data.workStartTime).format("HH:mm");
     data.workEndTime = moment(data.workEndTime).format("HH:mm");
     data.paymentDate = moment(data.paymentDate).format("DD.MM.YYYY");
     data.contacts = contacts;
+
     let res = await createClinic(data);
-    console.log(res);
+
     if (res?.data?.success) {
-      message.success("Ro‘yxatdan o‘tish muvaffaqiyatli yakunlandi");
-      // navigate('/clinics');
+      message.success(res?.data?.message);
+      reset();
+      navigate("/clinics");
     } else {
-      message.error("Ro‘yxatdan o‘tishda xatolik yuz berdi", res?.error);
+      message.error(res?.data?.message);
     }
   };
 
@@ -108,23 +113,21 @@ const Register = () => {
   //     }
   // };
 
-  const handleInputChange = (value) => {
-    setCurrentContact(value); // Update state with the value directly
-  };
-
-  const addContact = () => {
-    if (currentContact.trim() !== "") {
-      setContacts([...contacts, currentContact]);
-      setCurrentContact("");
-    }
-  };
-
   const removeContact = (indexToRemove) => {
     setContacts(contacts.filter((_, index) => index !== indexToRemove));
   };
 
   const formatNumber = (number) => {
-    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return number.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
+  let phoneInputStyle = {
+    width: "100%",
+    height: "31px",
+    border: ".5px solid #d8d8d8",
+    borderRadius: "5px",
+    textIndent: "10px",
+    outline: "none",
   };
 
   return (
@@ -175,23 +178,17 @@ const Register = () => {
               <div style={{ display: "flex", alignItems: "center" }}>
                 <PhoneInput
                   defaultCountry="uz"
-                  value={currentContact}
+                  value={phone}
                   className="PhoneInput_el"
-                  onChange={(value) => handleInputChange(value)}
+                  onChange={(value) => {
+                    setPhone(value);
+                    if (value.length === 13) {
+                      setContacts([...contacts, value]);
+                      setPhone("+998");
+                    }
+                  }}
                   placeholder="Aloqa uchun telefon raqamini kiriting"
-                  inputStyle={{
-                    width: "100%",
-                    height: "31px",
-                    border: ".5px solid #d8d8d8",
-                    borderRadius: "5px",
-                    textIndent: "10px",
-                    outline: "none",
-                  }} // Komponentni moslashtirish uchun stili o'zgartiring
-                />
-                <Button
-                  type="dashed"
-                  onClick={addContact}
-                  icon={<PlusOutlined />}
+                  inputStyle={phoneInputStyle} // Komponentni moslashtirish uchun stili o'zgartiring
                 />
               </div>
             </Form.Item>
@@ -212,7 +209,7 @@ const Register = () => {
         <Row gutter={16}>
           <Col span={8}>
             <Form.Item
-              label="Direktor yoki rahbar ma’lumotlari: (FIO)"
+              label="Direktor (FIO)"
               validateStatus={errors.manager ? "error" : ""}
               help={errors.manager ? errors.manager.message : ""}
             >
@@ -221,10 +218,10 @@ const Register = () => {
                 control={control}
                 defaultValue=""
                 rules={{
-                  required: "Direktor yoki rahbar ma’lumotlari talab qilinadi",
+                  required: "Direktor (FIO) talab qilinadi",
                 }}
                 render={({ field }) => (
-                  <Input {...field} placeholder="Direktor yoki rahbar FIO" />
+                  <Input {...field} placeholder="Direktor (FIO)" />
                 )}
               />
             </Form.Item>
@@ -361,6 +358,17 @@ const Register = () => {
             </Form.Item>
           </Col>
         </Row>
+        <Row gutter={16}>
+          <Col span={8}>
+            <Form.Item label="Shifoxona rasmi">
+              <Controller
+                name="clinicImageUrl"
+                control={control}
+                render={({ field }) => <Input {...field} placeholder="URL" />}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
         <Form.Item>
           <Button
             type="primary"
@@ -368,7 +376,7 @@ const Register = () => {
             style={{ width: "100%" }}
             loading={isLoading}
           >
-            Ro‘yxatdan o‘tish
+            Ro'yxatga olish
           </Button>
         </Form.Item>
       </Form>

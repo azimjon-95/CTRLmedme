@@ -88,10 +88,10 @@ const MainLayout = ({ handleLogout }) => {
             <Link to="/clinics">Shifoxonalar jadvali</Link>
           </Menu.Item>
           <Menu.Item key="/register" icon={<BiClinic />}>
-            <Link to="/register">Shifoxonani Ro'yxatga olish</Link>
+            <Link to="/register">Shifoxona ro'yxatga olish</Link>
           </Menu.Item>
           <Menu.Item key="/create_admin" icon={<UserOutlined />}>
-            <Link to="/create_admin">Admindi Ro'yxatga olish</Link>
+            <Link to="/create_admin">Admin ro'yxatga olish</Link>
           </Menu.Item>
 
           <Menu.Item icon={<LogoutOutlined />} key="logout" onClick={showModal}>
@@ -104,7 +104,7 @@ const MainLayout = ({ handleLogout }) => {
           className="site-layout-background"
           style={{ padding: 0, textAlign: "center", color: "white" }}
         >
-          <h1>Klinik boshqaruv tizimi</h1>
+          <h1>Shifoxona boshqaruv paneli</h1>
         </Header>
         <Content>
           <div style={{ padding: 10, background: "#fff", minHeight: 520 }}>
@@ -113,14 +113,14 @@ const MainLayout = ({ handleLogout }) => {
         </Content>
       </Layout>
       <Modal
-        title="Chiqish"
+        title="Tizimdan chiqish"
         open={isModalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
         okText="OK"
         cancelText="NO"
       >
-        <p>Chiqishni istaysizmi?</p>
+        <p>Tizimdan chiqishni istaysizmi?</p>
       </Modal>
     </Layout>
   );
