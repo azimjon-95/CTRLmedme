@@ -31,6 +31,7 @@ moment.locale("uz", {
 
 const ClinicTable = () => {
   const { data: clinics = [], isLoading } = useGetAllClinicsQuery();
+
   const [updateClinic] = useUpdateClinicMutation();
   const [deleteClinic] = useDeleteClinicMutation();
   const [markPaymentMade] = useMarkPaymentMadeMutation();

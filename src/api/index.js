@@ -1,8 +1,7 @@
 import axios from "axios";
 
 const mainURL = axios.create({
-  // baseURL: "http://localhost:5500",
-  // baseURL: "https://yasmina-backend.vercel.app/",
+  // baseURL: "http://localhost:8080",
   baseURL: "https://medme.abdujabborov.uz/",
 });
 
